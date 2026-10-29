@@ -1,4 +1,4 @@
-name: Build CloudStream extension
+name: Build CloudStream Extension
 
 on:
   workflow_dispatch:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -21,21 +21,18 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Verify Java
+        run: java -version
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-30
-            build-tools;30.0.3
-
-      - name: Grant execute permission
-        run: chmod +x ./gradlew
 
       - name: Build extension
-        run: ./gradlew assembleRelease --stacktrace
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --stacktrace
 
-      - name: Upload build files
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cloudstream-extension
