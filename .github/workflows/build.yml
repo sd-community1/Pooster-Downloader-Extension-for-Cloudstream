@@ -1,17 +1,22 @@
+
 name: Build CloudStream Extension
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Build Android Extension
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -27,16 +32,19 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Build extension
         run: |
           chmod +x ./gradlew
           ./gradlew assembleRelease --stacktrace
 
-      - name: Upload build artifacts
+      - name: Upload build files
         uses: actions/upload-artifact@v4
         with:
           name: cloudstream-extension
           path: |
             **/build/outputs/**/*.apk
             **/build/libs/*.jar
-          if-no-files-found: warn
+          if-no-files-found: error
