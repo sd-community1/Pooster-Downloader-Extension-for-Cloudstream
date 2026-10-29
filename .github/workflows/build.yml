@@ -1,18 +1,18 @@
+
 name: Build CloudStream extension
 
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
-
-permissions:
-  contents: read
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -20,20 +20,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build extension
-        run: |
-          chmod +x ./gradlew
-          ./gradlew make makePluginsJson
+      - name: Grant execute permission
+        run: chmod +x ./gradlew
 
-      - name: Upload extension files
+      - name: Build extension
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload build files
         uses: actions/upload-artifact@v4
         with:
-          name: CloudStream-Poster-Downloader
+          name: cloudstream-extension
           path: |
-            **/build/*.cs3
-            build/plugins.json
-          if-no-files-found: error
+            **/build/outputs/**/*.apk
+            **/build/libs/*.jar
+          if-no-files-found: warn
